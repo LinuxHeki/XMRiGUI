@@ -1,0 +1,8 @@
+{
+    "mine": false,
+    "pool": "POOL",
+    "user": "YOUR_MONERO_WALLET",
+    "password": "PASSWORD / YOUR_WORKER_NAME",
+    "donate": "1",
+    "threads": "0"
+}

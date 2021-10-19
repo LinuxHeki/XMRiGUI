@@ -1,0 +1,3 @@
+override_dh_fixperms:
+    dh_fixperms
+    chmod 666 /opt/xmrigui/settings.json
