@@ -20,7 +20,6 @@ Coins:
 * Safex
 * ArQmA
 * NINJA
-* Wownero
 
 Other cryptos **may** work if the algorithm is the same.
 

@@ -1,6 +1,6 @@
 .PHONY: build install uninstall clean deb
 
-package = xmrigui_1.1-0_amd64
+package = xmrigui_1.1-1_amd64
 
 build:
 	pyinstaller --onefile -w xmrigui.py
@@ -9,7 +9,6 @@ install:
 	cp dist/xmrigui /usr/local/bin/
 	mkdir -p /opt/xmrigui
 	cp xmrig /opt/xmrigui/
-	cp settings.json ${HOME}/.config/xmrigui.json
 	mkdir -p /usr/share/icons/hicolor/256x256/apps
 	cp xmrigui.png /usr/share/icons/hicolor/256x256/apps/
 	cp xmrigui.desktop /usr/share/applications/
@@ -17,7 +16,6 @@ install:
 uninstall:
 	rm /usr/local/bin/xmrigui
 	rm -rf /opt/xmrigui
-	rm ${HOME}/.config/xmrigui.json
 	rm /usr/share/icons/hicolor/256x256/apps/xmrigui.png
 	rm /usr/share/applications/xmrigui.desktop
 

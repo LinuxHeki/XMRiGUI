@@ -254,8 +254,7 @@ class XMRiGUI(Gtk.Window):
             'Talleo',
             'Safex',
             'ArQmA',
-            'NINJA',
-            'Wownero'
+            'NINJA'
         ]
         self.algos = [
             'rx/0',
@@ -269,8 +268,7 @@ class XMRiGUI(Gtk.Window):
             'cn-pico/tlo',
             'rx/sfx',
             'rx/arq',
-            'argon2/ninja',
-            'rx/wow'
+            'argon2/ninja'
         ]
         self.raw_config = '''{
     "mine": false,
