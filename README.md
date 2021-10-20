@@ -8,25 +8,34 @@ XMRiGUI is free and open-source crypto miner for Linux. It uses [XMRig](http://g
 
 ## Features
 Coins:
-* **Monero**
-* Ravencoin (soon)
-* Chukwa (soon)
-* CCX (soon)
-* Keva (soon)
-* Dero (soon)
-* Talleo (soon)
-* Safex (soon)
-* ArQmA (soon)
-* NINJA (soon)
-* Wownero (soon)
+* Monero
+* Ravencoin
+* Uplexa
+* Chukwa
+* Chukwa v2
+* CCX
+* Keva
+* Dero
+* Talleo
+* Safex
+* ArQmA
+* NINJA
+* Wownero
 
 Other cryptos **may** work if the algorithm is the same.
 
 Mining backends:
 * **CPU** x64
 * **CPU** ARMv8 (soon)
-* **OpenCL** for AMD GPUs (soon)
-* **CUDA** for NVIDIA GPUs (soon)
+* **OpenCL** for AMD GPUs
+* **CUDA** for NVIDIA GPUs
+
+If OpenCL doesn't work try to install [this driver](https://github.com/Diolinux/amd-opencl-pro-linux-resolve).
+<br>
+
+For CUDA to work you need to build [Cuda plugin](http://github.com/xmrig/xmrig-cuda#linux-usage) and put it into `/opt/xmrigui/`
+
+**I NEVER TESTED OPENCL OR CUDA BECAUSE I DON'T HAVE THAT GOOD GPU! PLEASE TEST AND IF SOMETHING GOES WRONG PLEASE REPORT!**
 <br>
 <br>
 

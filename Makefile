@@ -1,6 +1,6 @@
 .PHONY: build install uninstall clean deb
 
-package = xmrigui_1.0-0_amd64
+package = xmrigui_1.1-0_amd64
 
 build:
 	pyinstaller --onefile -w xmrigui.py

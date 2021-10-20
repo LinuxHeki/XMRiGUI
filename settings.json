@@ -4,5 +4,9 @@
     "user": "YOUR_MONERO_WALLET",
     "password": "PASSWORD / YOUR_WORKER_NAME",
     "donate": "1",
-    "threads": "0"
+    "threads": "0",
+    "cuda": false,
+    "opencl": false,
+    "cpu": true,
+    "coin": 0
 }

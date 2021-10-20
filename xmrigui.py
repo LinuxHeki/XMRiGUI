@@ -43,32 +43,27 @@ def call_instance():
 class XMRiGUI(Gtk.Window):
     def __init__(self):
         super().__init__()
-        self.user = os.getlogin()
-        self.settings_path = f'/home/{self.user}/.config/xmrigui.json'
-        self.xmrig_path = '/opt/xmrigui/xmrig'
-        self.icon_path = '/usr/share/icons/hicolor/256x256/apps/xmrigui.png'
+        self.load_data()
         self.config = self.get_config()
         self.draw()
         if self.config['mine']: self.start_mining(save=False)
 
     def get_config(self):
-        config = '''{
-    "mine": false,
-    "pool": "POOL",
-    "user": "YOUR_MONERO_WALLET",
-    "password": "PASSWORD / YOUR_WORKER_NAME",
-    "donate": "1",
-    "threads": "0"
-}
-'''
-
         try:
-            with open(self.settings_path, 'r') as f:
-                return json.loads(f.read())
+            with open(self.settings_path, 'r') as f: pass
+            try:
+                with open(self.settings_path, 'r') as f:
+                    config = json.loads(f.read())
+                    test = config['coin']
+                return config
+            except:
+                with open(self.settings_path, 'w') as f:
+                    f.write(self.raw_config)
+                return json.loads(self.raw_config)
         except:
             with open(self.settings_path, 'x'): pass
-            with open(self.settings_path, 'w')as f: f.write(config)
-            return json.loads(config)
+            with open(self.settings_path, 'w') as f: f.write(self.raw_config)
+            return json.loads(self.raw_config)
         
     def onSwitch(self, source, state):
         if state: self.start_mining()
@@ -78,15 +73,19 @@ class XMRiGUI(Gtk.Window):
         if save:
             self.config['mine'] = True
             self.save('switch', restart=False)
+        
+        args = ''
+        args += f' --algo={self.algos[self.config["coin"]]}'
+        args += f' --url={self.config["pool"]}'
+        args += f' --user={self.config["user"]}'
+        args += f' --pass={self.config["password"]}'
+        args += f' --donate-level={self.config["donate"]}'
+        if self.config['threads'] != '0': args += f' --threads={self.config["threads"]}'
+        if self.config['cuda']: args += f' --cuda --cuda-loader={self.cuda_plugin_path}'
+        if self.config['opencl']: args += ' --opencl'
+        if not self.config['cpu']: args += ' --no-cpu'
 
-        pool = f' --url={self.config["pool"]}'
-        user = f' --user={self.config["user"]}'
-        password = f' --pass={self.config["password"]}'
-        donate = f' --donate-level={self.config["donate"]}'
-        if self.config['threads'] != '0': threads = f' --threads={self.config["threads"]}'
-        else: threads = ''
-
-        os.system(self.xmrig_path + ' --background --coin=monero' + pool + user + password + donate + threads)
+        os.system(self.xmrig_path + ' --background' + args)
     
     def stop_mining(self, save=True):
         if save:
@@ -100,14 +99,19 @@ class XMRiGUI(Gtk.Window):
         self.config['password'] = self.pass_entry.get_text()
         self.config['donate'] = self.donate_entry.get_text()
         self.config['threads'] = self.threads_entry.get_text()
+        self.config['cuda'] = self.cuda_switch.get_active()
+        self.config['opencl'] = self.opencl_switch.get_active()
+        self.config['cpu'] = self.cpu_switch.get_active()
+        self.config['coin'] = self.crypto_chooser.get_active()
+        print(self.config['coin'])
 
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
         if restart and self.config['mine']:
-            self.stop_mining()
-            self.start_mining()
+            self.stop_mining(save=False)
+            self.start_mining(save=False)
 
-    def draw(self):
+    def draw(self, update=True):
         self.set_title('XMRiGUI')
         self.icon = GdkPixbuf.Pixbuf.new_from_file(filename=self.icon_path)
         self.set_icon(self.icon)
@@ -185,9 +189,102 @@ class XMRiGUI(Gtk.Window):
         self.settings.attach(self.donate_box, 1,0,1,1)
         self.settings.attach(self.threads_box, 1,1,1,1)
         self.settings.attach(self.save_button, 1,2,1,1)
+
+        self.advanched_settings = Gtk.Expander(label='Advanched options')
+        self.advanched_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.advanched_grid = Gtk.Grid(column_homogeneous=True, row_spacing=10)
+
+        self.cuda_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.cuda_label = Gtk.Label(label='NVidia GPU')
+        self.cuda_switch = Gtk.Switch()
+        self.cuda_switch.connect('state-set', self.save)
+        self.cuda_switch.set_active(self.config['cuda'])
+        self.cuda_box.pack_start(self.cuda_label, True, False, 0)
+        self.cuda_box.pack_start(self.cuda_switch, True, False, 0)
+
+        self.opencl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        self.opencl_label = Gtk.Label(label='AMD GPU')
+        self.opencl_switch = Gtk.Switch()
+        self.opencl_switch.connect('state-set', self.save)
+        self.opencl_switch.set_active(self.config['opencl'])
+        self.opencl_box.pack_start(self.opencl_label, True, False, 0)
+        self.opencl_box.pack_start(self.opencl_switch, True, False, 0)
+
+        self.cpu_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        self.cpu_label = Gtk.Label(label='CPU')
+        self.cpu_switch = Gtk.Switch()
+        self.cpu_switch.connect('state-set', self.save)
+        self.cpu_switch.set_active(self.config['cpu'])
+        self.cpu_box.pack_start(self.cpu_label, True, False, 0)
+        self.cpu_box.pack_start(self.cpu_switch, True, False, 0)
+
+        self.crypto_chooser = Gtk.ComboBoxText()
+        self.crypto_chooser.set_entry_text_column(0)
+        self.crypto_chooser.connect("changed", self.save)
+        for crypto in self.cryptos: self.crypto_chooser.append_text(crypto)
+        if update: self.crypto_chooser.set_active(self.config['coin'])
+        else: self.crypto_chooser.set_active(self.config['coin']+1)
+
+        self.advanched_grid.attach(self.cuda_box, 0,0,1,1)
+        self.advanched_grid.attach(self.opencl_box, 0,1,1,1)
+        self.advanched_grid.attach(self.cpu_box, 0,2,1,1)
+        self.advanched_grid.attach(self.crypto_chooser, 1,0,1,2)
+        self.advanched_box.pack_start(self.advanched_grid, True, True, 20)
+        self.advanched_settings.add(self.advanched_box)
         
         self.box.pack_start(self.main_box, True, True, 0)
         self.box.pack_start(self.settings, True, True, 0)
+        self.box.pack_start(self.advanched_settings, True, True, 0)
+
+    def load_data(self):
+        self.user = os.getlogin()
+        self.settings_path = f'/home/{self.user}/.config/xmrigui.json'
+        self.xmrig_path = '/opt/xmrigui/xmrig'
+        self.icon_path = '/usr/share/icons/hicolor/256x256/apps/xmrigui.png'
+        self.cuda_plugin_path = '/opt/xmrigui/libxmrig-cuda.so'
+        self.cryptos = [
+            'Monero',
+            'Ravencoin',
+            'Uplexa',
+            'Chukwa',
+            'Chukwa v2',
+            'CCX',
+            'Keva',
+            'Dero',
+            'Talleo',
+            'Safex',
+            'ArQmA',
+            'NINJA',
+            'Wownero'
+        ]
+        self.algos = [
+            'rx/0',
+            'kawpow',
+            'cn/upx2',
+            'argon2/chukwa',
+            'argon2/chukwav2',
+            'cn/ccx',
+            'rx/keva',
+            'astrobwt',
+            'cn-pico/tlo',
+            'rx/sfx',
+            'rx/arq',
+            'argon2/ninja',
+            'rx/wow'
+        ]
+        self.raw_config = '''{
+    "mine": false,
+    "pool": "POOL",
+    "user": "YOUR_MONERO_WALLET",
+    "password": "PASSWORD / YOUR_WORKER_NAME",
+    "donate": "1",
+    "threads": "0",
+    "cuda": false,
+    "opencl": false,
+    "cpu": true,
+    "coin": 0
+}
+'''
 
 
 class AppIndicator():
@@ -217,7 +314,7 @@ class AppIndicator():
     
     def show(self, widget):
         self.window.config = self.window.get_config()
-        self.window.draw()
+        self.window.draw(update=False)
         self.window.show_all()
 
 
