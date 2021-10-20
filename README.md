@@ -24,8 +24,7 @@ Coins:
 Other cryptos **may** work if the algorithm is the same.
 
 Mining backends:
-* **CPU** x64
-* **CPU** ARMv8 (soon)
+* **CPU**
 * **OpenCL** for AMD GPUs
 * **CUDA** for NVIDIA GPUs
 
@@ -41,8 +40,8 @@ For CUDA to work you need to build [Cuda plugin](http://github.com/xmrig/xmrig-c
 ## Build from source
 If you want to build XMRiGUI from source, you'll need to have:
 * python3
-* pyinstaller
 * gtk3
+* pyinstaller
 <br>
 <br>
 
@@ -51,6 +50,11 @@ If you want to build XMRiGUI from source, you'll need to have:
 or If you want deb package:
 
 `make && make deb`
+<br>
+<br>
+
+## Custom XMRig
+If you want to use custom version of XMRig you need to replace `xmrig` with new one and than reinstall XMRiGUI or replace `/opt/xmrigui/xmrig` and restart the app.
 <br>
 <br>
 
