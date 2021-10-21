@@ -26,6 +26,10 @@ clean:
 	rm -rf xmrigui.spec
 
 deb:
+	mkdir -p $(package)/usr/local/bin/
+	mkdir -p $(package)/opt/xmrigui/
+	mkdir -p $(package)/usr/share/icons/hicolor/256x256/apps/
+	mkdir -p $(package)/usr/share/applications/
 	cp dist/xmrigui $(package)/usr/local/bin/
 	cp xmrig $(package)/opt/xmrigui/
 	cp xmrigui.png $(package)/usr/share/icons/hicolor/256x256/apps/
