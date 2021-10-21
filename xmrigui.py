@@ -43,7 +43,7 @@ class DBUSService(dbus.service.Object):
             self.window.mine_switch.set_active(True)
         if close_window: self.window.hide()
         elif open_window:
-            self.window.draw()
+            self.window.draw(update=False)
             self.window.show_all()
 
 def call_instance():
@@ -68,6 +68,7 @@ class XMRiGUI(Gtk.Window):
         self.load_data()
         self.config = self.get_config()
         self.draw()
+        self.stop_mining(save=False)
         if self.config['mine']: self.start_mining(save=False)
 
     def get_config(self):
@@ -86,10 +87,6 @@ class XMRiGUI(Gtk.Window):
             with open(self.settings_path, 'x'): pass
             with open(self.settings_path, 'w') as f: f.write(self.raw_config)
             return json.loads(self.raw_config)
-        
-    def onSwitch(self, source, state):
-        if state: self.start_mining()
-        else: self.stop_mining()
 
     def start_mining(self, save=True):
         if save:
@@ -115,7 +112,7 @@ class XMRiGUI(Gtk.Window):
             self.save('switch', restart=False)
         os.system('killall xmrig')
 
-    def save(self, source, restart=True):
+    def save(self, widget=None, restart=True):
         self.config['pool'] = self.pool_entry.get_text()
         self.config['user'] = self.user_entry.get_text()
         self.config['password'] = self.pass_entry.get_text()
@@ -124,15 +121,21 @@ class XMRiGUI(Gtk.Window):
         self.config['cuda'] = self.cuda_switch.get_active()
         self.config['opencl'] = self.opencl_switch.get_active()
         self.config['cpu'] = self.cpu_switch.get_active()
-        self.config['coin'] = self.crypto_chooser.get_active()
+        try:
+            self.config['coin'] = widget.get_active()
+        except: pass
 
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
         if restart and self.config['mine']:
             self.stop_mining(save=False)
             self.start_mining(save=False)
+    
+    def close(self, widget):
+        self.hide()
 
     def draw(self, update=True):
+        self.update = update
         self.set_title('XMRiGUI')
         self.icon = GdkPixbuf.Pixbuf.new_from_file(filename=self.icon_path)
         self.set_icon(self.icon)
@@ -154,7 +157,7 @@ class XMRiGUI(Gtk.Window):
         self.mine_label.set_markup('<big>Mine</big>')
         self.mine_switch = Gtk.Switch()
         self.mine_switch.set_active(self.config['mine'])
-        self.mine_switch.connect('state-set', self.onSwitch)
+        self.mine_switch.connect('state-set', self.on_mine_switch)
         self.mine_switch.props.valign = Gtk.Align.CENTER
         
         self.mine_box.pack_start(self.mine_label, True, True, 0)
@@ -202,7 +205,7 @@ class XMRiGUI(Gtk.Window):
         self.threads_box.pack_start(self.threads_entry, True, True, 0)
 
         self.save_button = Gtk.Button(label='Save')
-        self.save_button.connect('clicked', self.save)
+        self.save_button.connect('clicked', self.on_save)
 
         self.settings.attach(self.pool_box, 0,0,1,1)
         self.settings.attach(self.user_box, 0,1,1,1)
@@ -218,7 +221,7 @@ class XMRiGUI(Gtk.Window):
         self.cuda_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.cuda_label = Gtk.Label(label='NVidia GPU')
         self.cuda_switch = Gtk.Switch()
-        self.cuda_switch.connect('state-set', self.save)
+        self.cuda_switch.connect('state-set', self.on_cuda_switch)
         self.cuda_switch.set_active(self.config['cuda'])
         self.cuda_box.pack_start(self.cuda_label, True, False, 0)
         self.cuda_box.pack_start(self.cuda_switch, True, False, 0)
@@ -226,7 +229,7 @@ class XMRiGUI(Gtk.Window):
         self.opencl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         self.opencl_label = Gtk.Label(label='AMD GPU')
         self.opencl_switch = Gtk.Switch()
-        self.opencl_switch.connect('state-set', self.save)
+        self.opencl_switch.connect('state-set', self.on_opencl_switch)
         self.opencl_switch.set_active(self.config['opencl'])
         self.opencl_box.pack_start(self.opencl_label, True, False, 0)
         self.opencl_box.pack_start(self.opencl_switch, True, False, 0)
@@ -234,7 +237,7 @@ class XMRiGUI(Gtk.Window):
         self.cpu_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         self.cpu_label = Gtk.Label(label='CPU')
         self.cpu_switch = Gtk.Switch()
-        self.cpu_switch.connect('state-set', self.save)
+        self.cpu_switch.connect('state-set', self.on_cpu_switch)
         self.cpu_switch.set_active(self.config['cpu'])
         self.cpu_box.pack_start(self.cpu_label, True, False, 0)
         self.cpu_box.pack_start(self.cpu_switch, True, False, 0)
@@ -243,19 +246,45 @@ class XMRiGUI(Gtk.Window):
         self.crypto_chooser.set_entry_text_column(0)
         for crypto in self.cryptos: self.crypto_chooser.append_text(crypto)
         if update: self.crypto_chooser.set_active(self.config['coin'])
-        else: self.crypto_chooser.set_active(self.config['coin']+1)
-        self.crypto_chooser.connect("changed", self.save)
+        else: self.crypto_chooser.set_active(self.config['coin'])
+        self.crypto_chooser.connect('changed', self.on_crypto)
 
-        self.advanched_grid.attach(self.cuda_box, 0,0,1,1)
-        self.advanched_grid.attach(self.opencl_box, 0,1,1,1)
-        self.advanched_grid.attach(self.cpu_box, 0,2,1,1)
-        self.advanched_grid.attach(self.crypto_chooser, 1,0,1,2)
+        self.advanched_save_button = Gtk.Button(label='Save')
+        self.advanched_save_button.connect('clicked', self.on_advanched_save)
+
+        self.advanched_grid.attach(self.cuda_box, 0,0,1,2)
+        self.advanched_grid.attach(self.opencl_box, 0,2,1,2)
+        self.advanched_grid.attach(self.cpu_box, 0,4,1,2)
+        self.advanched_grid.attach(self.crypto_chooser, 1,0,1,3)
+        self.advanched_grid.attach(self.advanched_save_button, 1,3,1,3)
         self.advanched_box.pack_start(self.advanched_grid, True, True, 20)
         self.advanched_settings.add(self.advanched_box)
         
         self.box.pack_start(self.main_box, True, True, 0)
         self.box.pack_start(self.settings, True, True, 0)
         self.box.pack_start(self.advanched_settings, True, True, 0)
+
+    def on_mine_switch(self, widget, state):
+        if state: self.start_mining()
+        else: self.stop_mining()
+    
+    def on_save(self, widget):
+        self.save()
+    
+    def on_cuda_switch(self, widget):
+        self.save()
+    
+    def on_opencl_switch(self, widget):
+        self.save()
+    
+    def on_cpu_switch(self, widget, unknown):
+        self.save()
+    
+    def on_crypto(self, widget):
+        self.save(widget=widget)
+    
+    def on_advanched_save(self, widget):
+        self.save()
 
     def load_data(self):
         self.user = os.getlogin()
@@ -333,13 +362,13 @@ class AppIndicator():
     
     def show(self, widget):
         self.window.config = self.window.get_config()
-        self.window.draw(update=False)
+        self.window.draw()
         self.window.show_all()
 
 
 def main():
     win = XMRiGUI()
-    win.connect('destroy', win.hide)
+    win.connect('destroy', win.close)
     if not win.config['mine']: win.show_all()
     indicator = AppIndicator(win)
     myservice = DBUSService(win)
