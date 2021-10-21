@@ -44,7 +44,7 @@ For CUDA to work you need to build [Cuda plugin](http://github.com/xmrig/xmrig-c
 Command line options:
 * `start` for start mining
 * `stop` for stop mining
-* `--close` for minimize window
+* `--close` for close window
 * `--open` for open window
 <br>
 <br>
