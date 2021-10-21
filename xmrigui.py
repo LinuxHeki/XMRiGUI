@@ -103,7 +103,6 @@ class XMRiGUI(Gtk.Window):
         self.config['opencl'] = self.opencl_switch.get_active()
         self.config['cpu'] = self.cpu_switch.get_active()
         self.config['coin'] = self.crypto_chooser.get_active()
-        print(self.config['coin'])
 
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
@@ -319,7 +318,7 @@ class AppIndicator():
 def main():
     win = XMRiGUI()
     win.connect('destroy', win.hide)
-    win.show_all()
+    if not win.config['mine']: win.show_all()
     indicator = AppIndicator(win)
     myservice = DBUSService(win)
     Gtk.main()
