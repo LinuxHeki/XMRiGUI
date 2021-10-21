@@ -37,13 +37,15 @@ If OpenCL doesn't work try to install [this driver](https://github.com/Diolinux/
 
 For CUDA to work you need to build [Cuda plugin](http://github.com/xmrig/xmrig-cuda#linux-usage) and put it into `/opt/xmrigui/`
 
+**I NEVER TESTED OPENCL OR CUDA BECAUSE I DON'T HAVE THAT GOOD GPU! PLEASE TEST AND IF SOMETHING GOES WRONG PLEASE REPORT!**
+<br>
+<br>
+
 Command line options:
 * `start` for start mining
 * `stop` for stop mining
 * `--close` for minimize window
 * `--open` for open window
-
-**I NEVER TESTED OPENCL OR CUDA BECAUSE I DON'T HAVE THAT GOOD GPU! PLEASE TEST AND IF SOMETHING GOES WRONG PLEASE REPORT!**
 <br>
 <br>
 
