@@ -27,8 +27,10 @@ Mining backends:
 * **CPU**
 * **OpenCL** for AMD GPUs
 * **CUDA** for NVIDIA GPUs
+<br>
+<br>
 
-If you want this to work on arm processor like on Raspberry Pi, you need to build [XMRig](https://github.com/xmrig/xmrig) yourself and do [Custom XMRig](https://github.com/LinuxHeki/XMRiGUI#custom-xmrig).
+If you want this to work on arm processor like on Raspberry Pi, you need to build [XMRig](https://github.com/xmrig/xmrig) yourself, do [Custom XMRig](https://github.com/LinuxHeki/XMRiGUI#custom-xmrig) and than [build this](https://github.com/LinuxHeki/XMRiGUI#build-from-source).
 
 If OpenCL doesn't work try to install [this driver](https://github.com/Diolinux/amd-opencl-pro-linux-resolve).
 
