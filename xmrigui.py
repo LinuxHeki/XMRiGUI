@@ -82,7 +82,7 @@ class XMRiGUI(Gtk.Window):
             try:
                 with open(self.settings_path, 'r') as f:
                     config = json.loads(f.read())
-                    test = config['coin']
+                    test = config['default_args']
                 return config
             except:
                 with open(self.settings_path, 'w') as f:
@@ -99,15 +99,17 @@ class XMRiGUI(Gtk.Window):
             self.save('switch', restart=False)
         
         args = ''
-        args += f' --algo={self.algos[self.config["coin"]]}'
-        args += f' --url={self.config["pool"]}'
-        args += f' --user={self.config["user"]}'
-        args += f' --pass={self.config["password"]}'
-        args += f' --donate-level={self.config["donate"]}'
-        if self.config['threads'] != '0': args += f' --threads={self.config["threads"]}'
-        if self.config['cuda']: args += f' --cuda --cuda-loader={self.cuda_plugin_path}'
-        if self.config['opencl']: args += ' --opencl'
-        if not self.config['cpu']: args += ' --no-cpu'
+        if not self.config['default_args']:
+            args += f' --algo={self.algos[self.config["coin"]]}'
+            args += f' --url={self.config["pool"]}'
+            args += f' --user={self.config["user"]}'
+            args += f' --pass={self.config["password"]}'
+            args += f' --donate-level={self.config["donate"]}'
+            if self.config['threads'] != '0': args += f' --threads={self.config["threads"]}'
+            if self.config['cuda']: args += f' --cuda --cuda-loader={self.cuda_plugin_path}'
+            if self.config['opencl']: args += ' --opencl'
+            if not self.config['cpu']: args += ' --no-cpu'
+        if self.config['args']: args += f' {self.config["args"]}'
 
         os.system(self.xmrig_path + ' --background' + args)
     
@@ -129,6 +131,8 @@ class XMRiGUI(Gtk.Window):
         try:
             self.config['coin'] = widget.get_active()
         except: pass
+        self.config['args'] = self.args_entry.get_text()
+        self.config['default_args'] = self.default_args_switch.get_active()
 
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
@@ -228,7 +232,7 @@ class XMRiGUI(Gtk.Window):
         self.cuda_switch = Gtk.Switch()
         self.cuda_switch.connect('state-set', self.on_cuda_switch)
         self.cuda_switch.set_active(self.config['cuda'])
-        self.cuda_box.pack_start(self.cuda_label, True, False, 0)
+        self.cuda_box.pack_start(self.cuda_label, True, True, 0)
         self.cuda_box.pack_start(self.cuda_switch, True, False, 0)
 
         self.opencl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -236,7 +240,7 @@ class XMRiGUI(Gtk.Window):
         self.opencl_switch = Gtk.Switch()
         self.opencl_switch.connect('state-set', self.on_opencl_switch)
         self.opencl_switch.set_active(self.config['opencl'])
-        self.opencl_box.pack_start(self.opencl_label, True, False, 0)
+        self.opencl_box.pack_start(self.opencl_label, True, True, 0)
         self.opencl_box.pack_start(self.opencl_switch, True, False, 0)
 
         self.cpu_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -244,7 +248,7 @@ class XMRiGUI(Gtk.Window):
         self.cpu_switch = Gtk.Switch()
         self.cpu_switch.connect('state-set', self.on_cpu_switch)
         self.cpu_switch.set_active(self.config['cpu'])
-        self.cpu_box.pack_start(self.cpu_label, True, False, 0)
+        self.cpu_box.pack_start(self.cpu_label, True, True, 0)
         self.cpu_box.pack_start(self.cpu_switch, True, False, 0)
 
         self.crypto_chooser = Gtk.ComboBoxText()
@@ -254,6 +258,21 @@ class XMRiGUI(Gtk.Window):
         else: self.crypto_chooser.set_active(self.config['coin'])
         self.crypto_chooser.connect('changed', self.on_crypto)
 
+        self.default_args_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        self.default_args_label = Gtk.Label(label='Disable default args')
+        self.default_args_switch = Gtk.Switch()
+        self.default_args_switch.connect('state-set', self.on_args_switch)
+        self.default_args_switch.set_active(self.config['default_args'])
+        self.default_args_box.pack_start(self.default_args_label, True, False, 0)
+        self.default_args_box.pack_start(self.default_args_switch, True, False, 0)
+
+        self.args_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        self.args_label = Gtk.Label(label='Additional args:')
+        self.args_entry = Gtk.Entry()
+        self.args_entry.set_text(self.config['args'])
+        self.args_box.pack_start(self.args_label, False, True, 5)
+        self.args_box.pack_start(self.args_entry, True, True, 5)
+
         self.advanched_save_button = Gtk.Button(label='Save')
         self.advanched_save_button.connect('clicked', self.on_advanched_save)
 
@@ -261,8 +280,10 @@ class XMRiGUI(Gtk.Window):
         self.advanched_grid.attach(self.opencl_box, 0,2,1,2)
         self.advanched_grid.attach(self.cpu_box, 0,4,1,2)
         self.advanched_grid.attach(self.crypto_chooser, 1,0,1,3)
-        self.advanched_grid.attach(self.advanched_save_button, 1,3,1,3)
-        self.advanched_box.pack_start(self.advanched_grid, True, True, 20)
+        self.advanched_grid.attach(self.default_args_box, 1,4,1,2)
+        self.advanched_grid.attach(self.args_box, 0,6,2,1)
+        self.advanched_grid.attach(self.advanched_save_button, 0,7,2,1)
+        self.advanched_box.pack_start(self.advanched_grid, True, True, 15)
         self.advanched_settings.add(self.advanched_box)
         
         self.box.pack_start(self.main_box, True, True, 0)
@@ -287,6 +308,9 @@ class XMRiGUI(Gtk.Window):
     
     def on_crypto(self, widget):
         self.save(widget=widget)
+    
+    def on_args_switch(self, widget):
+        self.save()
     
     def on_advanched_save(self, widget):
         self.save()
@@ -335,7 +359,9 @@ class XMRiGUI(Gtk.Window):
     "cuda": false,
     "opencl": false,
     "cpu": true,
-    "coin": 0
+    "coin": 0,
+    "args": "",
+    "default_args": false
 }
 '''
 
@@ -376,7 +402,7 @@ def main():
     win.connect('destroy', win.close)
     if not win.config['mine']: win.show_all()
     indicator = AppIndicator(win)
-    myservice = DBUSService(win)
+    service = DBUSService(win)
     Gtk.main()
 
 if __name__ == '__main__':
