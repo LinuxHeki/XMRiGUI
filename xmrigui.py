@@ -19,6 +19,11 @@ class DBUSService(dbus.service.Object):
         self.window = window
         bus_name = dbus.service.BusName('me.linuxheki.xmrigui', bus=dbus.SessionBus())
         dbus.service.Object.__init__(self, bus_name, '/usr/local/bin/xmrigui')
+        args = ''
+        for i, arg in enumerate(sys.argv):
+            if i > 1: args += f' {arg}'
+            elif i > 0: args += arg
+        self.args_manager(args)
 
     @dbus.service.method('me.linuxheki.xmrigui', in_signature='s')
     def startup(self, args):
