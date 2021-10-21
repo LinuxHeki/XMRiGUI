@@ -7,6 +7,7 @@ XMRiGUI is free and open-source crypto miner for Linux. It uses [XMRig](http://g
 <br>
 
 ## Features
+
 Coins:
 * Monero
 * Ravencoin
@@ -36,11 +37,18 @@ If OpenCL doesn't work try to install [this driver](https://github.com/Diolinux/
 
 For CUDA to work you need to build [Cuda plugin](http://github.com/xmrig/xmrig-cuda#linux-usage) and put it into `/opt/xmrigui/`
 
+Command line options:
+* `start` for start mining
+* `stop` for stop mining
+* `--close` for minimize window
+* `--open` for open window
+
 **I NEVER TESTED OPENCL OR CUDA BECAUSE I DON'T HAVE THAT GOOD GPU! PLEASE TEST AND IF SOMETHING GOES WRONG PLEASE REPORT!**
 <br>
 <br>
 
 ## Build from source
+
 If you want to build XMRiGUI from source, you'll need to have:
 * python3
 * gtk3
@@ -57,6 +65,7 @@ or If you want deb package:
 <br>
 
 ## Custom XMRig
+
 If you want to use custom version of XMRig you need to replace `xmrig` with the new one and than reinstall XMRiGUI or replace `/opt/xmrigui/xmrig` and restart the app.
 <br>
 <br>

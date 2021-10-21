@@ -21,20 +21,42 @@ class DBUSService(dbus.service.Object):
         dbus.service.Object.__init__(self, bus_name, '/usr/local/bin/xmrigui')
 
     @dbus.service.method('me.linuxheki.xmrigui', in_signature='s')
-    def startup(self, arg):
-        self.window.draw()
-        self.window.show_all()
+    def startup(self, args):
+        self.args_manager(args)
+    
+    def args_manager(self, args):
+        args = args.split(' ')
+
+        close_window = False
+        open_window = False
+        start = False
+        stop = False
+        for arg in args:
+            if arg == '--close': close_window = True
+            if arg == '--open': open_window = True
+            if arg == 'stop': stop = True
+            if arg == 'start': start = True
+        
+        if stop:
+            self.window.mine_switch.set_active(False)
+        elif start:
+            self.window.mine_switch.set_active(True)
+        if close_window: self.window.hide()
+        elif open_window:
+            self.window.draw()
+            self.window.show_all()
 
 def call_instance():
     try:
         bus = dbus.SessionBus()
         programinstance = bus.get_object('me.linuxheki.xmrigui',  '/usr/local/bin/xmrigui')
         startup = programinstance.get_dbus_method('startup', 'me.linuxheki.xmrigui')
-        try:
-            arg = sys.argv[1]
-        except IndexError:
-            arg = ''
-        startup(arg)
+        args = ''
+        for i, arg in enumerate(sys.argv):
+            if i > 1: args += f' {arg}'
+            elif i > 0: args += arg
+
+        startup(args)
         print('Another instance was running and notified.')
     except dbus.exceptions.DBusException:
         exit(-1)
