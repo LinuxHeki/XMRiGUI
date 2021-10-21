@@ -220,10 +220,10 @@ class XMRiGUI(Gtk.Window):
 
         self.crypto_chooser = Gtk.ComboBoxText()
         self.crypto_chooser.set_entry_text_column(0)
-        self.crypto_chooser.connect("changed", self.save)
         for crypto in self.cryptos: self.crypto_chooser.append_text(crypto)
         if update: self.crypto_chooser.set_active(self.config['coin'])
         else: self.crypto_chooser.set_active(self.config['coin']+1)
+        self.crypto_chooser.connect("changed", self.save)
 
         self.advanched_grid.attach(self.cuda_box, 0,0,1,1)
         self.advanched_grid.attach(self.opencl_box, 0,1,1,1)
