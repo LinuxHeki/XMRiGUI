@@ -32,15 +32,15 @@ class DBUSService(dbus.service.Object):
     def args_manager(self, args):
         args = args.split(' ')
 
-        close_window = False
-        open_window = False
         start = False
         stop = False
+        close_window = False
+        open_window = False
         for arg in args:
-            if arg == '--close': close_window = True
-            if arg == '--open': open_window = True
             if arg == 'stop': stop = True
             if arg == 'start': start = True
+            if arg == '--close': close_window = True
+            if arg == '--open': open_window = True
         
         if stop:
             self.window.mine_switch.set_active(False)
