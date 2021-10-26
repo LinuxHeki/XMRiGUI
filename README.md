@@ -72,7 +72,17 @@ If you want to use custom version of XMRig you need to replace `xmrig` with the 
 <br>
 <br>
 
-## Donate
+## Contribute
+
+### Logo
+
+If you are good at making logos, please make simple, monero like logo for XMRiGUI!
+
+### Features
+
+If you want new feature, please contact me and I will probably added it!
+
+### Donate
 
 If you want to support me, please mine for some hours with my wallet and don't forget to set custom password ; ). Thank you!
 <br>
