@@ -1,6 +1,6 @@
 Package: xmrigui
 Source: xmrigui
-Version: 1.4
+Version: 1.4-1
 Architecture: amd64
 Maintainer: LinuxHeki <linuxheki@gmail.com>
 Description: GUI for XMRig crypto miner
