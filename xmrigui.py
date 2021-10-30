@@ -91,10 +91,10 @@ class Window(Gtk.Window):
         if self.config['profile-0']['mine']: self.start_mining('profile-0', save=False)
         if self.config['profile-1']['mine']: self.start_mining('profile-1', save=False)
         if self.config['profile-2']['mine']: self.start_mining('profile-2', save=False)
-        if not (self.config['profile-0']['mine'] or self.config['profile-1']['mine'] or self.config['profile-2']['mine']):
-            self.draw()
-            self.add(self.box)
-            self.show_all()
+        self.draw()
+        self.add(self.box)
+        self.show_all()
+        if (self.config['profile-0']['mine'] or self.config['profile-1']['mine'] or self.config['profile-2']['mine']): self.close(None)
 
     def get_config(self):
         try:
