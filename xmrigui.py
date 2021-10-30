@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import gi
-import os
-import json
-import sys
+import gi, os, json, sys
 import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
@@ -71,16 +68,33 @@ def call_instance():
         exit(-1)
 
 
+class PoolWarningDialog(Gtk.MessageDialog):
+    def __init__(self, parent):
+        super().__init__(title="Pool Warning", transient_for=parent, flags=0)
+        self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+
+        self.set_default_size(150, 100)
+
+        label = Gtk.Label(label="Warning! If are you using MineXMR, SupportXMR or NanoPool pool please change it!\n On the next release of XMRiGUI you will not be able to mine on this pools.")
+
+        box = self.get_content_area()
+        box.add(label)
+        self.show_all()
+
+
 class Window(Gtk.Window):
     def __init__(self):
         super().__init__()
         self.load_data()
         self.config = self.get_config()
-        self.draw()
         self.stop_mining('profile-0', restart=False, save=False)
         if self.config['profile-0']['mine']: self.start_mining('profile-0', save=False)
         if self.config['profile-1']['mine']: self.start_mining('profile-1', save=False)
         if self.config['profile-2']['mine']: self.start_mining('profile-2', save=False)
+        if not (self.config['profile-0']['mine'] or self.config['profile-1']['mine'] or self.config['profile-2']['mine']):
+            self.draw()
+            self.add(self.box)
+            self.show_all()
 
     def get_config(self):
         try:
@@ -111,7 +125,7 @@ class Window(Gtk.Window):
             args += f' --user={self.config[profile]["user"]}'
             args += f' --pass={self.config[profile]["password"]}'
             args += f' --donate-level={self.config[profile]["donate"]}'
-            if self.config[profile]['threads'] != '0': args += f' --threads={self.config[profile]["threads"]}'
+            if self.config[profile]['threads'] != '0': args += f' --threads={self.config[profile]["threads"]} --randomx-init={self.config[profile]["threads"]}'
             if self.config[profile]['cuda']: args += f' --cuda --cuda-loader={self.cuda_plugin_path}'
             if self.config[profile]['opencl']: args += ' --opencl'
             if not self.config[profile]['cpu']: args += ' --no-cpu'
@@ -180,13 +194,14 @@ class Window(Gtk.Window):
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
         if restart:
-            for profile in ['profile-0', 'profile-1', 'profile-2']:
-                if self.config[profile]['mine']:
-                    self.stop_mining(profile, save=False)
-                    self.start_mining(profile, save=False)
+            for profile_restart in ['profile-0', 'profile-1', 'profile-2']:
+                if self.config[profile_restart]['mine']:
+                    self.stop_mining(profile_restart, save=False)
+                    self.start_mining(profile_restart, save=False)
     
     def close(self, widget):
         self.hide()
+        self.remove(self.box)
 
     def draw(self, update=True):
         self.update = update
@@ -194,9 +209,7 @@ class Window(Gtk.Window):
         self.icon = GdkPixbuf.Pixbuf.new_from_file(filename=self.icon_path)
         self.set_icon(self.icon)
         self.set_border_width(20)
-
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        self.add(self.box)
 
 
 
@@ -539,7 +552,7 @@ class Window(Gtk.Window):
         self.threads_box2.pack_start(self.threads_entry2, True, True, 0)
 
         self.save_button2 = Gtk.Button(label='Save')
-        self.save_button2.connect('clicked', self.on_save1)
+        self.save_button2.connect('clicked', self.on_save2)
 
         self.settings2.attach(self.pool_box2, 0,0,1,1)
         self.settings2.attach(self.user_box2, 0,1,1,1)
@@ -629,15 +642,21 @@ class Window(Gtk.Window):
         self.box.pack_start(self.stack, True, True, 0)
 
     def on_mine_switch0(self, widget, state):
-        if state: self.start_mining('profile-0')
+        if state:
+            self.start_mining('profile-0')
+            self.pool_warning(self.pool_entry0.get_text())
         else: self.stop_mining('profile-0')
     
     def on_mine_switch1(self, widget, state):
-        if state: self.start_mining('profile-1')
+        if state:
+            self.start_mining('profile-1')
+            self.pool_warning(self.pool_entry1.get_text())
         else: self.stop_mining('profile-1')
     
     def on_mine_switch2(self, widget, state):
-        if state: self.start_mining('profile-2')
+        if state:
+            self.start_mining('profile-2')
+            self.pool_warning(self.pool_entry2.get_text())
         else: self.stop_mining('profile-2')
     
     def on_save0(self, widget):
@@ -714,6 +733,15 @@ class Window(Gtk.Window):
     def profile2_menu(self, widget):
         if self.config['profile-2']['mine']: self.mine_switch2.set_active(False)
         else: self.mine_switch2.set_active(True)
+
+    def pool_warning(self, current_pool):
+        pools = ['minexmr.com', 'supportxmr.com', 'nanopool.org']
+        for pool in pools:
+            if pool in current_pool:
+                dialog = PoolWarningDialog(self)
+                dialog.run()
+                dialog.destroy()
+                break
 
     def load_data(self):
         self.user = os.getlogin()
@@ -835,13 +863,13 @@ class AppIndicator():
     def show(self, widget):
         self.window.config = self.window.get_config()
         self.window.draw()
+        self.window.add(self.window.box)
         self.window.show_all()
 
 
 def main():
     win = Window()
     win.connect('destroy', win.close)
-    if not (win.config['profile-0']['mine'] or win.config['profile-1']['mine'] or win.config['profile-2']['mine']): win.show_all()
     indicator = AppIndicator(win)
     service = DBUSService(win)
     Gtk.main()
