@@ -58,9 +58,11 @@ If you want to build XMRiGUI from source, you'll need to have:
 <br>
 <br>
 
+Build:
+
 `make && sudo make install`
 
-or If you want deb package:
+or if you want deb package:
 
 `make && make deb`
 <br>
