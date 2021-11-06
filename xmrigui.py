@@ -15,7 +15,7 @@ class DBUSService(dbus.service.Object):
     def __init__(self, window):
         self.window = window
         bus_name = dbus.service.BusName('me.linuxheki.xmrigui', bus=dbus.SessionBus())
-        dbus.service.Object.__init__(self, bus_name, '/usr/local/bin/xmrigui')
+        dbus.service.Object.__init__(self, bus_name, '/me/linuxheki/xmrigui')
         args = ''
         for i, arg in enumerate(sys.argv):
             if i > 1: args += f' {arg}'
@@ -53,7 +53,7 @@ class DBUSService(dbus.service.Object):
 def call_instance():
     try:
         bus = dbus.SessionBus()
-        programinstance = bus.get_object('me.linuxheki.xmrigui',  '/usr/local/bin/xmrigui')
+        programinstance = bus.get_object('me.linuxheki.xmrigui',  '/me/linuxheki/xmrigui')
         startup = programinstance.get_dbus_method('startup', 'me.linuxheki.xmrigui')
         args = ''
         for i, arg in enumerate(sys.argv):
@@ -73,7 +73,7 @@ class PoolWarningDialog(Gtk.MessageDialog):
 
         self.set_default_size(150, 100)
 
-        label = Gtk.Label(label="Warning! If are you using MineXMR, SupportXMR or NanoPool pool please change it!\n On the next release of XMRiGUI you will not be able to mine on this pools.")
+        label = Gtk.Label(label="You can't mine on MineXMR, SupportXMR or NanoPool!\nPlease change the pool!")
 
         box = self.get_content_area()
         box.add(label)
@@ -85,14 +85,14 @@ class Window(Gtk.Window):
         super().__init__()
         self.load_data()
         self.config = self.get_config()
-        self.stop_mining('profile-0', restart=False, save=False)
-        if self.config['profile-0']['mine']: self.start_mining('profile-0', save=False)
-        if self.config['profile-1']['mine']: self.start_mining('profile-1', save=False)
-        if self.config['profile-2']['mine']: self.start_mining('profile-2', save=False)
+        self.stop_mining(self.profiles[0], restart=False, save=False)
+        if self.config[self.profiles[0]]['mine']: self.start_mining(self.profiles[0], save=False)
+        if self.config[self.profiles[1]]['mine']: self.start_mining(self.profiles[1], save=False)
+        if self.config[self.profiles[2]]['mine']: self.start_mining(self.profiles[2], save=False)
         self.draw()
         self.add(self.box)
         self.show_all()
-        if (self.config['profile-0']['mine'] or self.config['profile-1']['mine'] or self.config['profile-2']['mine']): self.close(None)
+        if (self.config[self.profiles[0]]['mine'] or self.config[self.profiles[1]]['mine'] or self.config[self.profiles[2]]['mine']): self.close(None)
 
     def get_config(self):
         try:
@@ -100,7 +100,7 @@ class Window(Gtk.Window):
             try:
                 with open(self.settings_path, 'r') as f:
                     config = json.loads(f.read())
-                    test = config['profile-2']
+                    test = config[self.profiles[2]]
                 return config
             except:
                 with open(self.settings_path, 'w') as f:
@@ -342,20 +342,23 @@ class Window(Gtk.Window):
 
     def on_mine_switch0(self, widget, state):
         if state:
-            self.start_mining(self.profiles[0])
-            self.pool_warning(self.widgets[self.profiles[0]]['pool_entry'].get_text())
+            if self.pool_warning(self.widgets[self.profiles[0]]['pool_entry'].get_text()):
+                self.start_mining(self.profiles[0])
+            else: widgets.set_active(False)
         else: self.stop_mining(self.profiles[0])
     
     def on_mine_switch1(self, widget, state):
         if state:
-            self.start_mining(self.profiles[1])
-            self.pool_warning(self.widgets[self.profiles[1]]['pool_entry'].get_text())
+            if self.pool_warning(self.widgets[self.profiles[1]]['pool_entry'].get_text()):
+                self.start_mining(self.profiles[1])
+            else: widgets.set_active(False)
         else: self.stop_mining(self.profiles[1])
     
     def on_mine_switch2(self, widget, state):
         if state:
-            self.start_mining(self.profiles[2])
-            self.pool_warning(self.widgets[self.profiles[2]]['pool_entry'].get_text())
+            if self.pool_warning(self.widgets[self.profiles[2]]['pool_entry'].get_text()):
+                self.start_mining(self.profiles[2])
+            else: widgets.set_active(False)
         else: self.stop_mining(self.profiles[2])
     
     def on_save(self, widget, state=None):
@@ -388,7 +391,8 @@ class Window(Gtk.Window):
                 dialog = PoolWarningDialog(self)
                 dialog.run()
                 dialog.destroy()
-                break
+                return False
+        return True
 
     def load_data(self):
         self.user = os.getlogin()
