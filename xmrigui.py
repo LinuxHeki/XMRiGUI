@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
-import gi, os, json, sys
-import dbus
+import gi, os, json, sys, dbus, requests
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 from multiprocessing import Process
+from time import sleep
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
-from gi.repository import Gtk, GdkPixbuf, AppIndicator3
+from gi.repository import Gtk, Gdk, GdkPixbuf, AppIndicator3
 
 
 class DBUSService(dbus.service.Object):
@@ -93,6 +93,8 @@ class Window(Gtk.Window):
         self.add(self.box)
         self.show_all()
         if (self.config[self.profiles[0]]['mine'] or self.config[self.profiles[1]]['mine'] or self.config[self.profiles[2]]['mine']): self.close(None)
+        self.hash_thread = Process(target=self.hashrate_thread)
+        self.hash_thread.start()
 
     def get_config(self):
         try:
@@ -110,6 +112,18 @@ class Window(Gtk.Window):
             with open(self.settings_path, 'x'): pass
             with open(self.settings_path, 'w') as f: f.write(self.raw_config)
             return json.loads(self.raw_config)
+    
+    def hashrate_thread(self):
+        while True:
+            for profile in range(3):
+                try:
+                    response = requests.get(self.api_url[profile])
+                    self.hashrate[profile] = response.json()['hashrate']['total'][profile]
+                    print(self.hashrate)
+                except:
+                    self.hashrate[profile] = None
+                #if not self.hashrate == None: self.widgets[self.profiles[profile]]['hashrate'].set_markup(f'<big>{str(self.hashrate[profile])} KH/S</big>')
+            sleep(3)
 
     def start_mining(self, profile, save=True):
         if save:
@@ -117,6 +131,9 @@ class Window(Gtk.Window):
             self.save('switch', restart=False)
 
         args = ''
+        if profile == self.profiles[0]: args += ' --http-enabled --http-port=10080'
+        if profile == self.profiles[1]: args += ' --http-enabled --http-port=10081'
+        if profile == self.profiles[2]: args += ' --http-enabled --http-port=10082'
         if not self.config[profile]['default_args']:
             args += f' --algo={self.algos[self.config[profile]["coin"]]}'
             args += f' --url={self.config[profile]["pool"]}'
@@ -192,8 +209,8 @@ class Window(Gtk.Window):
 
             self.widgets[profile]['pixbuf'] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self.icon_path, width=128, height=128, preserve_aspect_ratio=True)
             self.widgets[profile]['image'] = Gtk.Image.new_from_pixbuf(self.widgets[profile]['pixbuf'])
-            self.widgets[profile]['name'] = Gtk.Label()
-            self.widgets[profile]['name'].set_markup('<big>XMRiGUI</big>\nmade by LinuxHeki\n<a href="https://github.com/LinuxHeki/XMRiGUI">Source code</a>')
+            self.widgets[profile]['hashrate'] = Gtk.Label()
+            self.widgets[profile]['hashrate'].set_markup('<big>0 KH/S</big>')
             
             self.widgets[profile]['mine_box'] = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             self.widgets[profile]['mine_label'] = Gtk.Label()
@@ -208,7 +225,7 @@ class Window(Gtk.Window):
             self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_label'], True, True, 0)
             self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_switch'], True, True, 0)
             self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['image'], True, True, 0)
-            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['name'], True, True, 0)
+            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['hashrate'], True, True, 0)
             self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['mine_box'], True, True, 8)
 
             
@@ -329,12 +346,36 @@ class Window(Gtk.Window):
 
         
 
+        self.about_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+        self.about_grid = Gtk.Grid(column_homogeneous=True, column_spacing=10, row_spacing=30)
+
+        self.about_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self.icon_path, width=128, height=128, preserve_aspect_ratio=True)
+        self.about_icon = Gtk.Image.new_from_pixbuf(self.about_pixbuf)
+        self.about_label = Gtk.Label()
+        self.about_label.set_markup('<big>XMRiGUI</big>\nmade by LinuxHeki\n<a href="https://github.com/LinuxHeki/XMRiGUI">Source code</a>')
+        self.donate_label = Gtk.Label(label='Donate XMR:')
+        self.donate_entry = Gtk.Entry()
+        self.donate_entry.set_text(self.wallet)
+        self.donate_entry.set_editable(False)
+        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        self.donate_button = Gtk.Button(label='Copy')
+        self.donate_button.connect('clicked', self.donate_copy)
+        
+        self.about_grid.attach(self.about_icon, 0, 0, 4, 1)
+        self.about_grid.attach(self.about_label, 4, 0, 4, 1)
+        self.about_grid.attach(self.donate_label, 0, 1, 2, 1)
+        self.about_grid.attach(self.donate_entry, 2, 1, 3, 1)
+        self.about_grid.attach(self.donate_button, 5, 1, 3, 1)
+        self.about_box.pack_start(self.about_grid, True, True, 0)
+        
+        
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(850)
         self.stack.add_titled(self.widgets[self.profiles[0]]['box'], self.profiles[0], 'Profile 1')
         self.stack.add_titled(self.widgets[self.profiles[1]]['box'], self.profiles[1], 'Profile 2')
         self.stack.add_titled(self.widgets[self.profiles[2]]['box'], self.profiles[2], 'Profile 3')
+        self.stack.add_titled(self.about_box, 'about', 'About')
         self.stack_switcher = Gtk.StackSwitcher()
         self.stack_switcher.set_stack(self.stack)
         self.box.pack_start(self.stack_switcher, True, True, 0)
@@ -393,6 +434,9 @@ class Window(Gtk.Window):
                 dialog.destroy()
                 return False
         return True
+    
+    def donate_copy(self, widget):
+        self.clipboard.set_text(self.wallet, -1)
 
     def load_data(self):
         self.user = os.getlogin()
@@ -402,6 +446,9 @@ class Window(Gtk.Window):
         self.cuda_plugin_path = '/opt/xmrigui/libxmrig-cuda.so'
         self.profiles = ['profile-0', 'profile-1', 'profile-2']
         self.pools = ['minexmr.com', 'supportxmr.com', 'nanopool.org']
+        self.api_url = ['http://127.0.0.1:10080/2/summary', 'http://127.0.0.1:10081/2/summary', 'http://127.0.0.1:10082/2/summary']
+        self.hashrate = [0, 0, 0]
+        self.wallet = '45xutTV4zsmBWTiEwxjt5z2XpPyKMf4iRc2WmWiRcf4DVHgSsCyCyUMWTvBSZjCTwP9678xG6Re9dUKhBScPmqKN6DUXaHF'
         self.cryptos = [
             'Monero',
             'Ravencoin',
@@ -511,6 +558,7 @@ class AppIndicator():
         for profile in self.window.profiles:
             if self.window.config[profile]['mine']:
                 self.window.stop_mining(profile, restart=False, save=False)
+        self.window.hash_thread.terminate()
         Gtk.main_quit()
     
     def show(self, widget):
