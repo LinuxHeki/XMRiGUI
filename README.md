@@ -55,6 +55,8 @@ If you want to build XMRiGUI from source, you'll need to have:
 * python3
 * gtk3
 * pyinstaller
+* pygobject
+* gir1.2-appindicator3-0.1
 <br>
 <br>
 
