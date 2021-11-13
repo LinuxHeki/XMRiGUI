@@ -1,0 +1,3 @@
+dbus_python==1.2.16
+PyGObject==3.38.0
+requests==2.25.1
