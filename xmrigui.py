@@ -47,7 +47,7 @@ class DBUSService(dbus.service.Object):
                 self.window.widgets[profile]['mine_switch'].set_active(True)
         if close_window: self.window.hide()
         elif open_window:
-            self.window.draw(update=False)
+            self.window.add(self.window.box)
             self.window.show_all()
 
 def call_instance():
@@ -118,11 +118,15 @@ class Window(Gtk.Window):
             for profile in range(3):
                 try:
                     response = requests.get(self.api_url[profile])
-                    self.hashrate[profile] = response.json()['hashrate']['total'][profile]
-                    print(self.hashrate)
+                    hashrate = response.json()['hashrate']['total'][profile]
+                    self.hashrate[profile] = round(hashrate/100)/10
+                    print(str(self.hashrate[profile]))
                 except:
                     self.hashrate[profile] = None
-                #if not self.hashrate == None: self.widgets[self.profiles[profile]]['hashrate'].set_markup(f'<big>{str(self.hashrate[profile])} KH/S</big>')
+                if self.hashrate[profile] != None:
+                    label = f'<big>{str(self.hashrate[profile])} KH/S</big>'
+                    #self.widgets[self.profiles[profile]]['hashrate'].set_markup(label)
+                    self.draw()
             sleep(3)
 
     def start_mining(self, profile, save=True):
@@ -192,8 +196,7 @@ class Window(Gtk.Window):
         self.hide()
         self.remove(self.box)
 
-    def draw(self, update=True):
-        self.update = update
+    def draw(self):
         self.set_title('XMRiGUI')
         self.icon = GdkPixbuf.Pixbuf.new_from_file(filename=self.icon_path)
         self.set_icon(self.icon)
@@ -210,7 +213,9 @@ class Window(Gtk.Window):
             self.widgets[profile]['pixbuf'] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self.icon_path, width=128, height=128, preserve_aspect_ratio=True)
             self.widgets[profile]['image'] = Gtk.Image.new_from_pixbuf(self.widgets[profile]['pixbuf'])
             self.widgets[profile]['hashrate'] = Gtk.Label()
-            self.widgets[profile]['hashrate'].set_markup('<big>0 KH/S</big>')
+            for i in range(3):
+                if self.hashrate[i] == None and profile == self.profiles[i]: self.widgets[profile]['hashrate'].set_markup('<big>0 KH/S</big>')
+                elif profile == self.profiles[i]: self.widgets[profile]['hashrate'].set_markup(f'<big>{self.hashrate[i]} KH/S</big>')
             
             self.widgets[profile]['mine_box'] = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             self.widgets[profile]['mine_label'] = Gtk.Label()
@@ -447,7 +452,7 @@ class Window(Gtk.Window):
         self.profiles = ['profile-0', 'profile-1', 'profile-2']
         self.pools = ['minexmr.com', 'supportxmr.com', 'nanopool.org']
         self.api_url = ['http://127.0.0.1:10080/2/summary', 'http://127.0.0.1:10081/2/summary', 'http://127.0.0.1:10082/2/summary']
-        self.hashrate = [0, 0, 0]
+        self.hashrate = [None, None, None]
         self.wallet = '45xutTV4zsmBWTiEwxjt5z2XpPyKMf4iRc2WmWiRcf4DVHgSsCyCyUMWTvBSZjCTwP9678xG6Re9dUKhBScPmqKN6DUXaHF'
         self.cryptos = [
             'Monero',
@@ -562,10 +567,10 @@ class AppIndicator():
         Gtk.main_quit()
     
     def show(self, widget):
-        self.window.config = self.window.get_config()
-        self.window.draw()
-        self.window.add(self.window.box)
-        self.window.show_all()
+        if not self.window.is_visible():
+            self.window.config = self.window.get_config()
+            self.window.add(self.window.box)
+            self.window.show_all()
 
 
 def main():
