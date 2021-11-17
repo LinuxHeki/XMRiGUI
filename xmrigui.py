@@ -93,8 +93,6 @@ class Window(Gtk.Window):
         self.add(self.box)
         self.show_all()
         if (self.config[self.profiles[0]]['mine'] or self.config[self.profiles[1]]['mine'] or self.config[self.profiles[2]]['mine']): self.close(None)
-        self.hash_thread = Process(target=self.hashrate_thread)
-        self.hash_thread.start()
 
     def get_config(self):
         try:
@@ -112,22 +110,6 @@ class Window(Gtk.Window):
             with open(self.settings_path, 'x'): pass
             with open(self.settings_path, 'w') as f: f.write(self.raw_config)
             return json.loads(self.raw_config)
-    
-    def hashrate_thread(self):
-        while True:
-            for profile in range(3):
-                try:
-                    response = requests.get(self.api_url[profile])
-                    hashrate = response.json()['hashrate']['total'][profile]
-                    self.hashrate[profile] = round(hashrate/100)/10
-                    print(str(self.hashrate[profile]))
-                except:
-                    self.hashrate[profile] = None
-                if self.hashrate[profile] != None:
-                    label = f'<big>{str(self.hashrate[profile])} KH/S</big>'
-                    #self.widgets[self.profiles[profile]]['hashrate'].set_markup(label)
-                    self.draw()
-            sleep(3)
 
     def start_mining(self, profile, save=True):
         if save:
@@ -135,9 +117,6 @@ class Window(Gtk.Window):
             self.save('switch', restart=False)
 
         args = ''
-        if profile == self.profiles[0]: args += ' --http-enabled --http-port=10080'
-        if profile == self.profiles[1]: args += ' --http-enabled --http-port=10081'
-        if profile == self.profiles[2]: args += ' --http-enabled --http-port=10082'
         if not self.config[profile]['default_args']:
             args += f' --algo={self.algos[self.config[profile]["coin"]]}'
             args += f' --url={self.config[profile]["pool"]}'
@@ -212,10 +191,8 @@ class Window(Gtk.Window):
 
             self.widgets[profile]['pixbuf'] = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self.icon_path, width=128, height=128, preserve_aspect_ratio=True)
             self.widgets[profile]['image'] = Gtk.Image.new_from_pixbuf(self.widgets[profile]['pixbuf'])
-            self.widgets[profile]['hashrate'] = Gtk.Label()
-            for i in range(3):
-                if self.hashrate[i] == None and profile == self.profiles[i]: self.widgets[profile]['hashrate'].set_markup('<big>0 KH/S</big>')
-                elif profile == self.profiles[i]: self.widgets[profile]['hashrate'].set_markup(f'<big>{self.hashrate[i]} KH/S</big>')
+            self.widgets[profile]['name'] = Gtk.Label()
+            self.widgets[profile]['name'].set_markup('<big>XMRiGUI</big>\nmade by LinuxHeki\n<a href="https://github.com/LinuxHeki/XMRiGUI">Source code</a>')
             
             self.widgets[profile]['mine_box'] = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             self.widgets[profile]['mine_label'] = Gtk.Label()
@@ -230,7 +207,7 @@ class Window(Gtk.Window):
             self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_label'], True, True, 0)
             self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_switch'], True, True, 0)
             self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['image'], True, True, 0)
-            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['hashrate'], True, True, 0)
+            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['name'], True, True, 0)
             self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['mine_box'], True, True, 8)
 
             
@@ -349,30 +326,7 @@ class Window(Gtk.Window):
             self.widgets[profile]['box'].pack_start(self.widgets[profile]['settings'], True, True, 0)
             self.widgets[profile]['box'].pack_start(self.widgets[profile]['advanched_settings'], True, True, 0)
 
-        
 
-        self.about_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
-        self.about_grid = Gtk.Grid(column_homogeneous=True, column_spacing=10, row_spacing=30)
-
-        self.about_pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename=self.icon_path, width=128, height=128, preserve_aspect_ratio=True)
-        self.about_icon = Gtk.Image.new_from_pixbuf(self.about_pixbuf)
-        self.about_label = Gtk.Label()
-        self.about_label.set_markup('<big>XMRiGUI</big>\nmade by LinuxHeki\n<a href="https://github.com/LinuxHeki/XMRiGUI">Source code</a>')
-        self.donate_label = Gtk.Label(label='Donate XMR:')
-        self.donate_entry = Gtk.Entry()
-        self.donate_entry.set_text(self.wallet)
-        self.donate_entry.set_editable(False)
-        self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        self.donate_button = Gtk.Button(label='Copy')
-        self.donate_button.connect('clicked', self.donate_copy)
-        
-        self.about_grid.attach(self.about_icon, 0, 0, 4, 1)
-        self.about_grid.attach(self.about_label, 4, 0, 4, 1)
-        self.about_grid.attach(self.donate_label, 0, 1, 2, 1)
-        self.about_grid.attach(self.donate_entry, 2, 1, 3, 1)
-        self.about_grid.attach(self.donate_button, 5, 1, 3, 1)
-        self.about_box.pack_start(self.about_grid, True, True, 0)
-        
         
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
@@ -380,7 +334,6 @@ class Window(Gtk.Window):
         self.stack.add_titled(self.widgets[self.profiles[0]]['box'], self.profiles[0], 'Profile 1')
         self.stack.add_titled(self.widgets[self.profiles[1]]['box'], self.profiles[1], 'Profile 2')
         self.stack.add_titled(self.widgets[self.profiles[2]]['box'], self.profiles[2], 'Profile 3')
-        self.stack.add_titled(self.about_box, 'about', 'About')
         self.stack_switcher = Gtk.StackSwitcher()
         self.stack_switcher.set_stack(self.stack)
         self.box.pack_start(self.stack_switcher, True, True, 0)
@@ -439,9 +392,6 @@ class Window(Gtk.Window):
                 dialog.destroy()
                 return False
         return True
-    
-    def donate_copy(self, widget):
-        self.clipboard.set_text(self.wallet, -1)
 
     def load_data(self):
         self.user = os.getlogin()
