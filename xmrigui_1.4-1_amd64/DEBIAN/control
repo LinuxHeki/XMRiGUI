@@ -4,4 +4,4 @@ Version: 1.4-1
 Architecture: amd64
 Maintainer: LinuxHeki <linuxheki@gmail.com>
 Description: GUI for XMRig crypto miner
-Depends: libc6 (>= 2.14), zlib1g (>= 1:1.1.4)
+Depends: libc6 (>= 2.14), zlib1g (>= 1:1.1.4), libuv1-dev, gir1.2-appindicator3-0.1
