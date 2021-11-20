@@ -204,11 +204,11 @@ class Window(Gtk.Window):
             elif profile == self.profiles[2]: self.widgets[profile]['mine_switch'].connect('state-set', self.on_mine_switch2)
             self.widgets[profile]['mine_switch'].props.valign = Gtk.Align.CENTER
             
-            self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_label'], True, True, 0)
-            self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_switch'], True, True, 0)
-            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['image'], True, True, 0)
-            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['name'], True, True, 0)
-            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['mine_box'], True, True, 8)
+            self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_label'], False, False, 10)
+            self.widgets[profile]['mine_box'].pack_start(self.widgets[profile]['mine_switch'], False, False, 10)
+            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['image'], False, False, 10)
+            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['name'], False, False, 10)
+            self.widgets[profile]['main_box'].pack_start(self.widgets[profile]['mine_box'], False, False, 10)
 
             
             self.widgets[profile]['settings'] = Gtk.Grid(column_homogeneous=True, column_spacing=10, row_spacing=10)
@@ -217,35 +217,35 @@ class Window(Gtk.Window):
             self.widgets[profile]['pool_label'] = Gtk.Label(label='Pool:')
             self.widgets[profile]['pool_entry'] = Gtk.Entry()
             self.widgets[profile]['pool_entry'].set_text(self.config[profile]['pool'])
-            self.widgets[profile]['pool_box'].pack_start(self.widgets[profile]['pool_label'], True, True, 0)
+            self.widgets[profile]['pool_box'].pack_start(self.widgets[profile]['pool_label'], False, False, 10)
             self.widgets[profile]['pool_box'].pack_start(self.widgets[profile]['pool_entry'], True, True, 0)
 
             self.widgets[profile]['user_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['user_label'] = Gtk.Label(label='User:')
             self.widgets[profile]['user_entry'] = Gtk.Entry()
             self.widgets[profile]['user_entry'].set_text(self.config[profile]['user'])
-            self.widgets[profile]['user_box'].pack_start(self.widgets[profile]['user_label'], True, True, 0)
+            self.widgets[profile]['user_box'].pack_start(self.widgets[profile]['user_label'], False, False, 10)
             self.widgets[profile]['user_box'].pack_start(self.widgets[profile]['user_entry'], True, True, 0)
 
             self.widgets[profile]['pass_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['pass_label'] = Gtk.Label(label='Password:')
             self.widgets[profile]['pass_entry'] = Gtk.Entry()
             self.widgets[profile]['pass_entry'].set_text(self.config[profile]['password'])
-            self.widgets[profile]['pass_box'].pack_start(self.widgets[profile]['pass_label'], True, True, 0)
+            self.widgets[profile]['pass_box'].pack_start(self.widgets[profile]['pass_label'], False, False, 10)
             self.widgets[profile]['pass_box'].pack_start(self.widgets[profile]['pass_entry'], True, True, 0)
 
             self.widgets[profile]['donate_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['donate_label'] = Gtk.Label(label='Donate:')
             self.widgets[profile]['donate_entry'] = Gtk.Entry()
             self.widgets[profile]['donate_entry'].set_text(self.config[profile]['donate'])
-            self.widgets[profile]['donate_box'].pack_start(self.widgets[profile]['donate_label'], True, True, 0)
+            self.widgets[profile]['donate_box'].pack_start(self.widgets[profile]['donate_label'], False, False, 10)
             self.widgets[profile]['donate_box'].pack_start(self.widgets[profile]['donate_entry'], True, True, 0)
 
             self.widgets[profile]['threads_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['threads_label'] = Gtk.Label(label='Threads:')
             self.widgets[profile]['threads_entry'] = Gtk.Entry()
             self.widgets[profile]['threads_entry'].set_text(self.config[profile]['threads'])
-            self.widgets[profile]['threads_box'].pack_start(self.widgets[profile]['threads_label'], True, True, 0)
+            self.widgets[profile]['threads_box'].pack_start(self.widgets[profile]['threads_label'], False, False, 10)
             self.widgets[profile]['threads_box'].pack_start(self.widgets[profile]['threads_entry'], True, True, 0)
 
             self.widgets[profile]['save_button'] = Gtk.Button(label='Save')
@@ -267,24 +267,24 @@ class Window(Gtk.Window):
             self.widgets[profile]['cuda_switch'] = Gtk.Switch()
             self.widgets[profile]['cuda_switch'].set_active(self.config[profile]['cuda'])
             self.widgets[profile]['cuda_switch'].connect('state-set', self.on_save)
-            self.widgets[profile]['cuda_box'].pack_start(self.widgets[profile]['cuda_label'], True, True, 0)
-            self.widgets[profile]['cuda_box'].pack_start(self.widgets[profile]['cuda_switch'], True, False, 0)
+            self.widgets[profile]['cuda_box'].pack_start(self.widgets[profile]['cuda_label'], False, False, 10)
+            self.widgets[profile]['cuda_box'].pack_start(self.widgets[profile]['cuda_switch'], False, False, 10)
 
             self.widgets[profile]['opencl_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['opencl_label'] = Gtk.Label(label='AMD GPU')
             self.widgets[profile]['opencl_switch'] = Gtk.Switch()
             self.widgets[profile]['opencl_switch'].set_active(self.config[profile]['opencl'])
             self.widgets[profile]['opencl_switch'].connect('state-set', self.on_save)
-            self.widgets[profile]['opencl_box'].pack_start(self.widgets[profile]['opencl_label'], True, True, 0)
-            self.widgets[profile]['opencl_box'].pack_start(self.widgets[profile]['opencl_switch'], True, False, 0)
+            self.widgets[profile]['opencl_box'].pack_start(self.widgets[profile]['opencl_label'], False, False, 10)
+            self.widgets[profile]['opencl_box'].pack_start(self.widgets[profile]['opencl_switch'], False, False, 10)
 
             self.widgets[profile]['cpu_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['cpu_label'] = Gtk.Label(label='CPU')
             self.widgets[profile]['cpu_switch'] = Gtk.Switch()
             self.widgets[profile]['cpu_switch'].set_active(self.config[profile]['cpu'])
             self.widgets[profile]['cpu_switch'].connect('state-set', self.on_save)
-            self.widgets[profile]['cpu_box'].pack_start(self.widgets[profile]['cpu_label'], True, True, 0)
-            self.widgets[profile]['cpu_box'].pack_start(self.widgets[profile]['cpu_switch'], True, False, 0)
+            self.widgets[profile]['cpu_box'].pack_start(self.widgets[profile]['cpu_label'], False, False, 10)
+            self.widgets[profile]['cpu_box'].pack_start(self.widgets[profile]['cpu_switch'], False, False, 10)
 
             self.widgets[profile]['crypto_chooser'] = Gtk.ComboBoxText()
             self.widgets[profile]['crypto_chooser'].set_entry_text_column(0)
@@ -299,15 +299,15 @@ class Window(Gtk.Window):
             self.widgets[profile]['default_args_switch'] = Gtk.Switch()
             self.widgets[profile]['default_args_switch'].set_active(self.config[profile]['default_args'])
             self.widgets[profile]['default_args_switch'].connect('state-set', self.on_save)
-            self.widgets[profile]['default_args_box'].pack_start(self.widgets[profile]['default_args_label'], True, False, 0)
-            self.widgets[profile]['default_args_box'].pack_start(self.widgets[profile]['default_args_switch'], True, False, 0)
+            self.widgets[profile]['default_args_box'].pack_start(self.widgets[profile]['default_args_label'], False, False, 10)
+            self.widgets[profile]['default_args_box'].pack_start(self.widgets[profile]['default_args_switch'], False, False, 10)
 
             self.widgets[profile]['args_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['args_label'] = Gtk.Label(label='Additional args:')
             self.widgets[profile]['args_entry'] = Gtk.Entry()
             self.widgets[profile]['args_entry'].set_text(self.config[profile]['args'])
-            self.widgets[profile]['args_box'].pack_start(self.widgets[profile]['args_label'], False, True, 5)
-            self.widgets[profile]['args_box'].pack_start(self.widgets[profile]['args_entry'], True, True, 5)
+            self.widgets[profile]['args_box'].pack_start(self.widgets[profile]['args_label'], False, False, 10)
+            self.widgets[profile]['args_box'].pack_start(self.widgets[profile]['args_entry'], True, True, 0)
 
             self.widgets[profile]['advanched_save_button'] = Gtk.Button(label='Save')
             self.widgets[profile]['advanched_save_button'].connect('clicked', self.on_save)
@@ -319,12 +319,12 @@ class Window(Gtk.Window):
             self.widgets[profile]['advanched_grid'].attach(self.widgets[profile]['default_args_box'], 1,4,1,2)
             self.widgets[profile]['advanched_grid'].attach(self.widgets[profile]['args_box'], 0,6,2,1)
             self.widgets[profile]['advanched_grid'].attach(self.widgets[profile]['advanched_save_button'], 0,7,2,1)
-            self.widgets[profile]['advanched_box'].pack_start(self.widgets[profile]['advanched_grid'], True, True, 15)
+            self.widgets[profile]['advanched_box'].pack_start(self.widgets[profile]['advanched_grid'], False, False, 10)
             self.widgets[profile]['advanched_settings'].add(self.widgets[profile]['advanched_box'])
             
-            self.widgets[profile]['box'].pack_start(self.widgets[profile]['main_box'], True, True, 0)
-            self.widgets[profile]['box'].pack_start(self.widgets[profile]['settings'], True, True, 0)
-            self.widgets[profile]['box'].pack_start(self.widgets[profile]['advanched_settings'], True, True, 0)
+            self.widgets[profile]['box'].pack_start(self.widgets[profile]['main_box'], False, False, 10)
+            self.widgets[profile]['box'].pack_start(self.widgets[profile]['settings'], False, False, 10)
+            self.widgets[profile]['box'].pack_start(self.widgets[profile]['advanched_settings'], False, False, 10)
 
 
         
@@ -336,8 +336,8 @@ class Window(Gtk.Window):
         self.stack.add_titled(self.widgets[self.profiles[2]]['box'], self.profiles[2], 'Profile 3')
         self.stack_switcher = Gtk.StackSwitcher()
         self.stack_switcher.set_stack(self.stack)
-        self.box.pack_start(self.stack_switcher, True, True, 0)
-        self.box.pack_start(self.stack, True, True, 0)
+        self.box.pack_start(self.stack_switcher, False, False, 10)
+        self.box.pack_start(self.stack, False, False, 10)
 
     def on_mine_switch0(self, widget, state):
         if state:
