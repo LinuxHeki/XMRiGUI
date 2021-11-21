@@ -129,10 +129,10 @@ class Window(Gtk.Window):
             if not self.config[profile]['cpu']: args += ' --no-cpu'
         if self.config[profile]['args']: args += f' {self.config["args"]}'
 
-        os.system(self.xmrig_path + ' --background' + args)
+        os.system('pkexec ' + self.xmrig_path + ' --background' + args)
     
     def stop_mining(self, profile, restart=True, save=True):
-        os.system('killall xmrig')
+        os.system('pkexec killall xmrig')
 
         if restart:
             if profile == self.profiles[0] and self.config[self.profiles[1]]['mine']: self.start_mining(self.profiles[1], save=False)
@@ -510,7 +510,6 @@ class AppIndicator():
         for profile in self.window.profiles:
             if self.window.config[profile]['mine']:
                 self.window.stop_mining(profile, restart=False, save=False)
-        self.window.hash_thread.terminate()
         Gtk.main_quit()
     
     def show(self, widget):
