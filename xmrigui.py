@@ -350,14 +350,14 @@ class Window(Gtk.Window):
         if state:
             if self.pool_warning(self.widgets[self.profiles[1]]['pool_entry'].get_text()):
                 self.start_mining(self.profiles[1])
-            else: widgets.set_active(False)
+            else: widget.set_active(False)
         else: self.stop_mining(self.profiles[1])
     
     def on_mine_switch2(self, widget, state):
         if state:
             if self.pool_warning(self.widgets[self.profiles[2]]['pool_entry'].get_text()):
                 self.start_mining(self.profiles[2])
-            else: widgets.set_active(False)
+            else: widget.set_active(False)
         else: self.stop_mining(self.profiles[2])
     
     def on_save(self, widget, state=None):
@@ -401,9 +401,6 @@ class Window(Gtk.Window):
         self.cuda_plugin_path = '/opt/xmrigui/libxmrig-cuda.so'
         self.profiles = ['profile-0', 'profile-1', 'profile-2']
         self.pools = ['minexmr.com', 'supportxmr.com', 'nanopool.org']
-        self.api_url = ['http://127.0.0.1:10080/2/summary', 'http://127.0.0.1:10081/2/summary', 'http://127.0.0.1:10082/2/summary']
-        self.hashrate = [None, None, None]
-        self.wallet = '45xutTV4zsmBWTiEwxjt5z2XpPyKMf4iRc2WmWiRcf4DVHgSsCyCyUMWTvBSZjCTwP9678xG6Re9dUKhBScPmqKN6DUXaHF'
         self.cryptos = [
             'Monero',
             'Ravencoin',
