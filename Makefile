@@ -13,14 +13,12 @@ install:
 	mkdir -p /usr/share/icons/hicolor/256x256/apps
 	cp xmrigui.png /usr/share/icons/hicolor/256x256/apps/
 	cp xmrigui.desktop /usr/share/applications/
-	cp org.freedesktop.policykit.xmrigui.policy /usr/share/polkit-1/actions/
 
 uninstall:
 	rm /usr/local/bin/xmrigui
 	rm -rf /opt/xmrigui
 	rm /usr/share/icons/hicolor/256x256/apps/xmrigui.png
 	rm /usr/share/applications/xmrigui.desktop
-	rm /usr/share/polkit-1/actions/org.freedesktop.policykit.xmrigui.policy
 
 clean:
 	rm -rf __pycache__
@@ -50,7 +48,6 @@ py-install:
 	mkdir -p /usr/share/icons/hicolor/256x256/apps
 	cp xmrigui.png /usr/share/icons/hicolor/256x256/apps/
 	cp xmrigui.desktop /usr/share/applications/
-	cp org.freedesktop.policykit.xmrigui.policy /usr/share/polkit-1/actions/
 
 py-deb:
 	mkdir -p $(py-package)/usr/local/bin/

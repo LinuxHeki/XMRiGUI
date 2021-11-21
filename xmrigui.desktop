@@ -3,6 +3,6 @@ Encoding=UTF-8
 Version=1.5-2
 Type=Application
 Terminal=false
-Exec=pkexec /usr/local/bin/xmrigui
+Exec=/usr/local/bin/xmrigui
 Name=XMRiGUI
 Icon=/usr/share/icons/hicolor/256x256/apps/xmrigui.png
