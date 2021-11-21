@@ -1,7 +1,7 @@
 Package: xmrigui
 Source: xmrigui
-Version: 1.4-1
+Version: 1.5-0-py
 Architecture: amd64
 Maintainer: LinuxHeki <linuxheki@gmail.com>
 Description: GUI for XMRig crypto miner
-Depends: libc6 (>= 2.14), zlib1g (>= 1:1.1.4), libuv1-dev, gir1.2-appindicator3-0.1
+Depends: python3 (>= 3.6), python3-pip, libuv1-dev, gir1.2-appindicator3-0.1
