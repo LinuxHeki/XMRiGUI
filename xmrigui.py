@@ -97,7 +97,7 @@ class Window(Gtk.Window):
     def start_mining(self, profile, save=True):
         if save:
             self.config[profile]['mine'] = True
-            self.save('switch', restart=False)
+            self.save(restart=False)
 
         args = ''
         if not self.config[profile]['default_args']:
@@ -127,21 +127,24 @@ class Window(Gtk.Window):
 
         if save:
             self.config[profile]['mine'] = False
-            self.save('switch', restart=False)
+            self.save(restart=False)
 
     def save(self, restart=True):
-        for profile in self.profiles:
-            self.config[profile]['pool'] = self.widgets[profile]['pool_entry'].get_text()
-            self.config[profile]['user'] = self.widgets[profile]['user_entry'].get_text()
-            self.config[profile]['password'] = self.widgets[profile]['pass_entry'].get_text()
-            self.config[profile]['donate'] = self.widgets[profile]['donate_entry'].get_text()
-            self.config[profile]['threads'] = self.widgets[profile]['threads_entry'].get_text()
-            self.config[profile]['cuda'] = self.widgets[profile]['cuda_switch'].get_active()
-            self.config[profile]['opencl'] = self.widgets[profile]['opencl_switch'].get_active()
-            self.config[profile]['cpu'] = self.widgets[profile]['cpu_switch'].get_active()
-            self.config[profile]['args'] = self.widgets[profile]['args_entry'].get_text()
-            self.config[profile]['default_args'] = self.widgets[profile]['default_args_switch'].get_active()
-            self.config[profile]['coin'] = self.widgets[profile]['crypto_chooser'].get_active()
+        try:
+            for profile in self.profiles:
+                self.config[profile]['pool'] = self.widgets[profile]['pool_entry'].get_text()
+                self.config[profile]['user'] = self.widgets[profile]['user_entry'].get_text()
+                self.config[profile]['password'] = self.widgets[profile]['pass_entry'].get_text()
+                self.config[profile]['donate'] = self.widgets[profile]['donate_entry'].get_text()
+                self.config[profile]['threads'] = self.widgets[profile]['threads_entry'].get_text()
+                self.config[profile]['cuda'] = self.widgets[profile]['cuda_switch'].get_active()
+                self.config[profile]['opencl'] = self.widgets[profile]['opencl_switch'].get_active()
+                self.config[profile]['cpu'] = self.widgets[profile]['cpu_switch'].get_active()
+                self.config[profile]['args'] = self.widgets[profile]['args_entry'].get_text()
+                self.config[profile]['default_args'] = self.widgets[profile]['default_args_switch'].get_active()
+                self.config[profile]['coin'] = self.widgets[profile]['crypto_chooser'].get_active()
+        except:
+            pass
             
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
@@ -340,16 +343,16 @@ class Window(Gtk.Window):
         self.save()
 
     def profile0_menu(self, widget):
-        if self.config[self.profiles[0]]['mine']: self.widgets[self.profiles[0]]['mine_switch'].set_active(False)
-        else: self.widgets[self.profiles[0]]['mine_switch'].set_active(True)
+        if self.config[self.profiles[0]]['mine']: self.stop_mining(self.profiles[0])
+        else: self.start_mining(self.profiles[0])
     
     def profile1_menu(self, widget):
-        if self.config[self.profiles[1]]['mine']: self.widgets[self.profiles[1]]['mine_switch'].set_active(False)
-        else: self.widgets[self.profiles[1]]['mine_switch'].set_active(True)
+        if self.config[self.profiles[1]]['mine']: self.stop_mining(self.profiles[1])
+        else: self.start_mining(self.profiles[1])
     
     def profile2_menu(self, widget):
-        if self.config[self.profiles[2]]['mine']: self.widgets[self.profiles[2]]['mine_switch'].set_active(False)
-        else: self.widgets[self.profiles[2]]['mine_switch'].set_active(True)
+        if self.config[self.profiles[2]]['mine']: self.stop_mining(self.profiles[2])
+        else: self.start_mining(self.profiles[2])
 
     def load_data(self):
         self.user = os.getlogin()
