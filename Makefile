@@ -9,6 +9,7 @@ install:
 	mkdir -p /usr/share/icons/hicolor/256x256/apps
 	cp xmrigui.png /usr/share/icons/hicolor/256x256/apps/
 	cp xmrigui.desktop /usr/share/applications/
+	cp xmrigui_as_root.desktop /usr/share/applications/
 	cp org.freedesktop.policykit.xmrigui.policy /usr/share/polkit-1/actions/org.freedesktop.policykit.xmrigui.policy
 
 uninstall:
@@ -16,6 +17,7 @@ uninstall:
 	rm -rf /opt/xmrigui
 	rm /usr/share/icons/hicolor/256x256/apps/xmrigui.png
 	rm /usr/share/applications/xmrigui.desktop
+	rm /usr/share/applications/xmrigui_as_root.desktop
 	rm /usr/share/polkit-1/actions/org.freedesktop.policykit.xmrigui.policy
 
 deb:
@@ -28,6 +30,7 @@ deb:
 	cp xmrig $(package)/opt/xmrigui/
 	cp xmrigui.png $(package)/usr/share/icons/hicolor/256x256/apps/
 	cp xmrigui.desktop $(package)/usr/share/applications/
+	cp xmrigui_as_root.desktop $(package)/usr/share/applications/
 	cp org.freedesktop.policykit.xmrigui.policy $(package)/usr/share/polkit-1/actions/org.freedesktop.policykit.xmrigui.policy
 	dpkg-deb --build --root-owner-group $(package)
 	rm $(package)/usr/local/bin/*
