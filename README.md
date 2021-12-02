@@ -21,6 +21,7 @@ Coins:
 * Safex
 * ArQmA
 * NINJA
+* Raptoreum
 
 Other cryptos **may** work if the algorithm is the same.
 

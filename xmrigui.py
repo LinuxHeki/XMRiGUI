@@ -66,20 +66,6 @@ def call_instance():
         exit(-1)
 
 
-class PoolWarningDialog(Gtk.MessageDialog):
-    def __init__(self, parent):
-        super().__init__(title="Pool Warning", transient_for=parent, flags=0)
-        self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
-
-        self.set_default_size(150, 100)
-
-        label = Gtk.Label(label="You can't mine on MineXMR, SupportXMR or NanoPool!\nPlease change the pool!")
-
-        box = self.get_content_area()
-        box.add(label)
-        self.show_all()
-
-
 class Window(Gtk.Window):
     def __init__(self):
         super().__init__()
@@ -127,7 +113,7 @@ class Window(Gtk.Window):
             if self.config[profile]['cuda']: args += f' --cuda --cuda-loader={self.cuda_plugin_path}'
             if self.config[profile]['opencl']: args += ' --opencl'
             if not self.config[profile]['cpu']: args += ' --no-cpu'
-        if self.config[profile]['args']: args += f' {self.config["args"]}'
+        if self.config[profile]['args']: args += f' {self.config[profile]["args"]}'
 
         os.system(self.xmrig_path + ' --background' + args)
     
@@ -146,7 +132,7 @@ class Window(Gtk.Window):
             self.config[profile]['mine'] = False
             self.save('switch', restart=False)
 
-    def save(self, which_profile=None, widget=None, restart=True):
+    def save(self, restart=True):
         for profile in self.profiles:
             self.config[profile]['pool'] = self.widgets[profile]['pool_entry'].get_text()
             self.config[profile]['user'] = self.widgets[profile]['user_entry'].get_text()
@@ -158,11 +144,8 @@ class Window(Gtk.Window):
             self.config[profile]['cpu'] = self.widgets[profile]['cpu_switch'].get_active()
             self.config[profile]['args'] = self.widgets[profile]['args_entry'].get_text()
             self.config[profile]['default_args'] = self.widgets[profile]['default_args_switch'].get_active()
-
-            if which_profile == self.profiles[0]: self.config[profile]['coin'] = widget.get_active()
-            elif which_profile == self.profiles[1]: self.config[profile]['coin'] = widget.get_active()
-            elif which_profile == self.profiles[2]: self.config[profile]['coin'] = widget.get_active()
-
+            self.config[profile]['coin'] = self.widgets[profile]['crypto_chooser'].get_active()
+            
         with open(self.settings_path, 'w') as f: f.write(json.dumps(self.config))
 
         if restart:
@@ -290,10 +273,8 @@ class Window(Gtk.Window):
             self.widgets[profile]['crypto_chooser'].set_entry_text_column(0)
             for crypto in self.cryptos: self.widgets[profile]['crypto_chooser'].append_text(crypto)
             self.widgets[profile]['crypto_chooser'].set_active(self.config[profile]['coin'])
-            if profile == 'profile-0': self.widgets[profile]['crypto_chooser'].connect('changed', self.on_crypto0)
-            elif profile == 'profile-1': self.widgets[profile]['crypto_chooser'].connect('changed', self.on_crypto1)
-            elif profile == 'profile-2': self.widgets[profile]['crypto_chooser'].connect('changed', self.on_crypto2)
-
+            self.widgets[profile]['crypto_chooser'].connect('changed', self.on_save)
+            
             self.widgets[profile]['default_args_box'] = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             self.widgets[profile]['default_args_label'] = Gtk.Label(label='Disable default args')
             self.widgets[profile]['default_args_switch'] = Gtk.Switch()
@@ -341,36 +322,21 @@ class Window(Gtk.Window):
 
     def on_mine_switch0(self, widget, state):
         if state:
-            if self.pool_warning(self.widgets[self.profiles[0]]['pool_entry'].get_text()):
-                self.start_mining(self.profiles[0])
-            else: widgets.set_active(False)
+            self.start_mining(self.profiles[0])
         else: self.stop_mining(self.profiles[0])
     
     def on_mine_switch1(self, widget, state):
         if state:
-            if self.pool_warning(self.widgets[self.profiles[1]]['pool_entry'].get_text()):
-                self.start_mining(self.profiles[1])
-            else: widget.set_active(False)
+            self.start_mining(self.profiles[1])
         else: self.stop_mining(self.profiles[1])
     
     def on_mine_switch2(self, widget, state):
         if state:
-            if self.pool_warning(self.widgets[self.profiles[2]]['pool_entry'].get_text()):
-                self.start_mining(self.profiles[2])
-            else: widget.set_active(False)
+            self.start_mining(self.profiles[2])
         else: self.stop_mining(self.profiles[2])
     
     def on_save(self, widget, state=None):
         self.save()
-    
-    def on_crypto0(self, widget):
-        self.save(which_profile=self.profiles[0], widget=widget)
-    
-    def on_crypto1(self, widget):
-        self.save(which_profile=self.profiles[1], widget=widget)
-    
-    def on_crypto2(self, widget):
-        self.save(which_profile=self.profiles[2], widget=widget)
 
     def profile0_menu(self, widget):
         if self.config[self.profiles[0]]['mine']: self.widgets[self.profiles[0]]['mine_switch'].set_active(False)
@@ -384,15 +350,6 @@ class Window(Gtk.Window):
         if self.config[self.profiles[2]]['mine']: self.widgets[self.profiles[2]]['mine_switch'].set_active(False)
         else: self.widgets[self.profiles[2]]['mine_switch'].set_active(True)
 
-    def pool_warning(self, current_pool):
-        for pool in self.pools:
-            if pool in current_pool:
-                dialog = PoolWarningDialog(self)
-                dialog.run()
-                dialog.destroy()
-                return False
-        return True
-
     def load_data(self):
         self.user = os.getlogin()
         self.settings_path = f'/home/{self.user}/.config/xmrigui.json'
@@ -400,7 +357,6 @@ class Window(Gtk.Window):
         self.icon_path = '/usr/share/icons/hicolor/256x256/apps/xmrigui.png'
         self.cuda_plugin_path = '/opt/xmrigui/libxmrig-cuda.so'
         self.profiles = ['profile-0', 'profile-1', 'profile-2']
-        self.pools = ['minexmr.com', 'supportxmr.com', 'nanopool.org']
         self.cryptos = [
             'Monero',
             'Ravencoin',
@@ -413,7 +369,8 @@ class Window(Gtk.Window):
             'Talleo',
             'Safex',
             'ArQmA',
-            'NINJA'
+            'NINJA',
+            'Raptoreum'
         ]
         self.algos = [
             'rx/0',
@@ -427,7 +384,8 @@ class Window(Gtk.Window):
             'cn-pico/tlo',
             'rx/sfx',
             'rx/arq',
-            'argon2/ninja'
+            'argon2/ninja',
+            'gr'
         ]
         self.raw_config = '''{
     "profile-0": {
