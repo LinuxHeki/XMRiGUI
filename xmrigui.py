@@ -75,10 +75,7 @@ class Window(Gtk.Window):
         if self.config[self.profiles[0]]['mine']: self.start_mining(self.profiles[0], save=False)
         if self.config[self.profiles[1]]['mine']: self.start_mining(self.profiles[1], save=False)
         if self.config[self.profiles[2]]['mine']: self.start_mining(self.profiles[2], save=False)
-        self.draw()
-        self.add(self.box)
-        self.show_all()
-        if (self.config[self.profiles[0]]['mine'] or self.config[self.profiles[1]]['mine'] or self.config[self.profiles[2]]['mine']): self.close(None)
+        if not (self.config[self.profiles[0]]['mine'] or self.config[self.profiles[1]]['mine'] or self.config[self.profiles[2]]['mine']): self.show_window()
 
     def get_config(self):
         try:
@@ -154,9 +151,12 @@ class Window(Gtk.Window):
                     self.stop_mining(profile, save=False)
                     self.start_mining(profile, save=False)
     
-    def close(self, widget):
+    def show_window(self):
+        self.draw()
+        self.show_all()
+    
+    def hide_window(self, widget):
         self.hide()
-        self.remove(self.box)
 
     def draw(self):
         self.set_title('XMRiGUI')
@@ -319,6 +319,7 @@ class Window(Gtk.Window):
         self.stack_switcher.set_stack(self.stack)
         self.box.pack_start(self.stack_switcher, False, False, 10)
         self.box.pack_start(self.stack, False, False, 10)
+        self.add(self.box)
 
     def on_mine_switch0(self, widget, state):
         if state:
@@ -472,9 +473,9 @@ class AppIndicator():
     
     def show(self, widget):
         if not self.window.is_visible():
-            self.window.config = self.window.get_config()
-            self.window.add(self.window.box)
-            self.window.show_all()
+            self.window = Window()
+            self.window.connect('destroy', self.window.hide_window)
+            self.window.show_window()
 
 
 def main():
