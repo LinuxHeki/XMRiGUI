@@ -1,6 +1,6 @@
 .PHONY: install uninstall clean deb
 
-package = xmrigui_1.5-2_amd64
+package = xmrigui_1.6-0_amd64
 
 install:
 	cp xmrigui.py /usr/local/bin/xmrigui
