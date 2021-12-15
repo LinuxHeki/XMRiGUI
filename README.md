@@ -63,11 +63,11 @@ If you want to build XMRiGUI from source, you'll need to have:
 
 Build:
 
-`make && sudo make install`
+`sudo make install`
 
 or if you want deb package:
 
-`make && make deb`
+`make deb`
 <br>
 <br>
 
@@ -92,5 +92,4 @@ If you want new feature, please contact me and I will probably added it!
 If you want to support me, please mine for some hours with my wallet and don't forget to set custom password ; ). Thank you!
 <br>
 Monero address: `45xutTV4zsmBWTiEwxjt5z2XpPyKMf4iRc2WmWiRcf4DVHgSsCyCyUMWTvBSZjCTwP9678xG6Re9dUKhBScPmqKN6DUXaHF`
-<br>
-Pool (optional): `de.monero.herominers.com:1111`
+Raptoreum address: `RKWdu5XxFKjpcfZqz1kKqFmaF7JRsecM5y`
