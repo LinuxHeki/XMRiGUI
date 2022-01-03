@@ -92,4 +92,5 @@ If you want new feature, please contact me and I will probably added it!
 If you want to support me, please mine for some hours with my wallet and don't forget to set custom password ; ). Thank you!
 <br>
 Monero address: `45xutTV4zsmBWTiEwxjt5z2XpPyKMf4iRc2WmWiRcf4DVHgSsCyCyUMWTvBSZjCTwP9678xG6Re9dUKhBScPmqKN6DUXaHF`
+<br>
 Raptoreum address: `RKWdu5XxFKjpcfZqz1kKqFmaF7JRsecM5y`
